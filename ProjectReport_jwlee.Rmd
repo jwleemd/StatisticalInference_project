@@ -1,0 +1,54 @@
+---
+title: "The distribution of sample means obtained from an exponential distribution"
+author: "Jae Wook Lee"
+date: "October 23, 2015"
+output: pdf_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+##Overview
+
+In this document, the properties of sample means for random samples obtained from an exponential distribution are analyzed.
+
+##Simulations
+To this end, 40 random values are sampled from an exponential distribution with rate (lambda) of 0.2 and the sample mean will be calculated. This process is repeated 1000 times, and the mean and variance of the sample mean are calculated. 
+
+##Sample mean versus Theoretical Mean
+
+```{r}
+lambda = 0.2   # rate for the exponential distribution
+nosim=1000     # number of simulations
+n = 40         # size of a sample
+samples = replicate(nosim, mean(rexp(n, rate=lambda)))  # a vector of 1000 sample means
+```
+The sample mean, i.e. average of 1000 means, is
+```{r, echo=TRUE}
+mean(samples)  # average of the 1000 sample means
+```
+And the standard error of the sample mean is
+```{r, echo=TRUE}
+sd(samples)       # standard error: standard deviation of the sample means
+```
+The histogram for the 1000 sample means shows that they approximate a normal distribution with a mean of 1/lambda and standard deviation of (1/lambda)/(sqrt(n)).
+
+```{r, echo=FALSE}
+hist(samples)
+xfit<-seq(min(samples),max(samples),length=40) 
+yfit<-dnorm(xfit,mean=1/lambda,sd=SE) 
+yfit<- yfit*diff(hist(samples)$mids[1:2])*length(samples) 
+lines(xfit, yfit, col="black", lwd=2)
+```
+The mean and standard deviation of the population distribution is 1/0.2 = 5. 
+
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
