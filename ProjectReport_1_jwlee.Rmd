@@ -2,7 +2,7 @@
 title: "The distribution of sample means obtained from an exponential distribution"
 author: "Jae Wook Lee"
 date: "October 23, 2015"
-output: pdf_document
+output: html_document
 ---
 
 ##Overview
@@ -24,7 +24,7 @@ samples = replicate(nosim, mean(rexp(n, rate=lambda)))  # a vector of 1000 sampl
 The mean of the sample means are `r mean(samples)`. It is almost equal to the population mean `r 1/lambda`.
 In the following code, we can see that the mean of the sample means approaches the theoretical mean as the number of simulation grows.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, fig.width=4, fig.height=3}
 means <- sapply(1:nosim, function(x) mean(replicate(x, mean(rexp(n, lambda)))))
 require(ggplot2)
 g <- ggplot(data.frame(x = 1 : nosim, y = means), aes(x = x, y = y)) + geom_line(size=1.5)
@@ -34,9 +34,8 @@ g
 ```
 
 ##Sample variance vs Theoretical variance
-The theoretical variance for the exponential distribution with rate = 0.2 is (1/0.2)^2 = 25. The variance of 1000 sample means is `r var(samples)`, which is very close to the population variance divided by the size of the sample (40), which is 0.625. 
-Similar to the mean of the sample means, the variance of the sample means approaches population variance/sqrt(40) as the number of simulation grows.
-```{r, echo=TRUE}
+The theoretical variance for the exponential distribution with rate = 0.2 is (1/0.2)^2 = 25. The variance of 1000 sample means is `r var(samples)`, which is very close to the population variance divided by the size of the sample (40) = 25/40 = 0.625. Similar to the mean of the sample means, the variance of the sample means approaches population variance/sqrt(40) as the number of simulation grows.
+```{r, echo=FALSE, fig.width=4, fig.height=3}
 vars <- sapply(2:nosim, function(x) var(replicate(x, mean(rexp(n, lambda)))))
 g <- ggplot(data.frame(x = 2 : nosim, y = vars), aes(x = x, y = y)) + geom_line(size=1.5)
 g <- g + geom_hline(yintercept = (1/lambda)^2/n, col="red", size=2)
@@ -49,7 +48,7 @@ g
 
 The histogram for the sample means shows that they approximate a normal distribution with a mean of 1/lambda and standard deviation of (1/lambda)/(sqrt(n)).
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=4, fig.height=3}
 
 p0 = qplot(samples, geom = 'blank') + 
         geom_histogram(aes(y = ..density..), color="black", fill="white") +
@@ -58,13 +57,9 @@ p0 = qplot(samples, geom = 'blank') +
         labs(title="Distribution of 1000 sample means", x="Mean of 40 exponentials", y="Density")
 p0
 ```
-
-The quantile-quantile plot and Shapiro-Wilk test for normality also support the fact that this sample is approximately normally distributed.
-
-```{r, echo=FALSE}
+  
+  
+   The quantile-quantile plot below also shows that 1000 samples means are normally distributed.
+```{r, echo=FALSE, fig.width=4, fig.height=3}
 qqnorm(samples)
 ```
-```{r, echo=TRUE}
-shapiro.test(samples)
-```
-

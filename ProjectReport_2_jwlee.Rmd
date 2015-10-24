@@ -1,0 +1,58 @@
+---
+title: "Analysis of the ToothGrowth data"
+author: "Jae Wook Lee"
+date: "October 24, 2015"
+output:
+  html_document:
+    fig_width: 3.2
+    fig_height: 2.4
+---
+The ToothGrowth data is loaded and summarized by the following code.
+
+```{r}
+data(ToothGrowth)
+summary(ToothGrowth)
+```
+
+The scatterplot and boxplot show that there seems to be a significant difference in tooth length between OJ and VC groups for doses 0.5 and 1.0. In addition, the line graph below shows that there is an increase in tooth length as dose increases from 0.5 to 2.0.
+```{r, echo=FALSE}
+require(ggplot2)
+ggplot(ToothGrowth, aes(x=supp, y=len)) + geom_point() + facet_wrap(~dose)
+ggplot(ToothGrowth, aes(x=supp, y=len)) + geom_boxplot() + facet_wrap(~dose)
+# Mean and Standard Deviation
+require(plyr)
+tg <- ddply(ToothGrowth, c("supp","dose"), summarize, length.mean=mean(len), length.sd=sd(len))
+ggplot(tg, aes(x=dose, y=length.mean, linetype=supp)) + geom_line()
+```
+
+To compare tooth length between two supp groups for each dose, 95% confidence interval is calculated and  two-tailed t-test with alpha = 0.05 is performed for each dose. The null hypothesis is that there is no difference in tooth growth between VJ and OC at each dose level.
+```{r}
+# a function that returns the confidence interval, t statistic, and p value for the difference of means between two vectors
+tt <- function(v1, v2) {
+        diffmean <- mean(v1) - mean(v2)   # difference in means
+        se <- sqrt(var(v1)/length(v1) + var(v2)/length(v2))   # standard error for t-statistic
+        conf.int <- diffmean + c(-1,1)*qt(0.975, length(v1) + length(v2) -2)*se  # confidence interval
+        t <- diffmean / se
+        p <- pt(t, length(v1) + length(v2) -2, lower.tail=FALSE)
+        vec <- round(c(conf.int, t, p),5)
+        names(vec) <- c("Conf.int.lower.limit","Conf.int.upper.limit","t","p-value")
+        return(vec)
+}
+```
+For dose 0.5,
+```{r, echo=FALSE}
+tt(ToothGrowth$len[31:40],ToothGrowth$len[1:10])    # for dose 0.5
+```
+The 95% confidence interval for mean difference between VJ and OC does not contain zero, and p-value is below 0.05. Therefore, the null hypothesis is rejected and the conclusion is that there is a significant difference in tooth length between VJ and OC at dose 0.5.
+
+For dose 1.0,
+```{r, echo=FALSE}
+tt(ToothGrowth$len[41:50],ToothGrowth$len[11:20])   # for dose 1.0
+```
+The 95% confidence interval for mean difference between VJ and OC does not contain zero, and p-value is below 0.05. Therefore, the null hypothesis is rejected and the conclusion is that there is a significant difference in tooth length between VJ and OC at dose 1.0.
+
+For dose 2.0,
+```{r, echo=FALSE}
+tt(ToothGrowth$len[51:60],ToothGrowth$len[21:30])   # for dose 2.0
+```
+The 95% confidence interval for mean difference between VJ and OC contains zero, and p-value is higher than 0.05. Therefore, the null hypothesis cannot be rejected and the conclusion is that there is no significant difference in tooth length between VJ and OC at dose 1.0.
